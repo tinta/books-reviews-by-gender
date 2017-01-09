@@ -1,0 +1,19 @@
+CREATE TABLE books(
+       ID INT PRIMARY KEY     NOT NULL,
+       NAME           TEXT    NOT NULL,
+       AUTHOR         TEXT    NOT NULL,
+       ISBN           TEXT    NOT NULL,
+       NUM_RATINGS    INT     NOT NULL,
+       AVG_RATING     REAL    NOT NULL
+);
+
+CREATE TABLE reviews(
+       ID INT PRIMARY KEY     NOT NULL,
+       BOOK_ID        INT     NOT NULL,
+       NAME           TEXT    NOT NULL,
+       GENDER         TEXT    NOT NULL,
+       DATE           TEXT    NOT NULL,
+       RATING         INT     NOT NULL,
+       LINK           TEXT    NOT NULL
+);
+
