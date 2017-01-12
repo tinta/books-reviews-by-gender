@@ -47,6 +47,8 @@ const scrapeBook = (isbn) => {
         .end()
         .then((result) => {
             MASTER_MAPPING.push(...result)
+        }, (err) => {
+            console.log('error with executing headless browser')
         })
     }
 
@@ -54,18 +56,23 @@ const scrapeBook = (isbn) => {
         return scrapePage(isbn, startPage).then(() => {
             if (startPage < endPage) return new Promise((resolve, reject) => {
                 console.log(MASTER_MAPPING.length)
-                setTimeout(() => scrapeBookByPage(isbn, startPage + 1, endPage).then(resolve), 1000)
+                setTimeout(() => scrapeBookByPage(isbn, startPage + 1, endPage).then(resolve, reject), 2000)
             })
-        })
+        }, () => new Promise((resolve) => {
+            console.log(`scrapePage() failed: ${isbn} ${startPage}`)
+            return resolve()
+        }))
     }
 
-
-    return scrapeBookByPage(isbn, 50, 51)
-    .then((foo) =>
-        MASTER_MAPPING.map((item) =>
+    const handler = () => {
+        console.log('scrapping has been completed!')
+        return MASTER_MAPPING.map((item) =>
             Object.assign(item, { BOOK_ID: isbn })
         )
-    )
+    }
+
+    return scrapeBookByPage(isbn, 301, 1000)
+    .then(handler, handler)
 
 }
 

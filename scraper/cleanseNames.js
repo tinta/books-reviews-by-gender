@@ -22,11 +22,26 @@ class Ratings {
     }, 0)
   }
 
+  getAverage () {
+    const allScores = [1,2,3,4,5].reduce((memo, item) => {
+      return memo + item * this.collection[item]
+    }, 0)
+
+    return allScores / this.getTotal()
+  }
+
   print () {
     console.log('')
     console.log(this.name)
+    console.log(`total: ${this.getTotal()}`)
+    console.log(`average: ${this.getAverage()}`)
     return [1,2,3,4,5].forEach((item) => {
-      console.log(`${item} | ${this.collection[item]}`)
+      const percent = (
+        this.collection[item] /
+        this.getTotal() *
+        100
+      )
+      console.log(`${item} | ${percent}`)
     })
   }
 }
