@@ -14,6 +14,7 @@ CREATE TABLE reviews(
        GENDER         TEXT    NOT NULL,
        DATE           TEXT    NOT NULL,
        RATING         INT     NOT NULL,
-       LINK           TEXT    NOT NULL
+       LINK           TEXT    NOT NULL,
+       unique (LINK)
 );
 
