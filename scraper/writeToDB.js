@@ -1,9 +1,8 @@
 var uuid = require('node-uuid');
 const sqlite3 = require('sqlite3').verbose()
-const db = new sqlite3.Database('books.db')
 
-const processReviews = (rawReviews) =>
-  rawReviews.map(({
+const processReviews = (rawReviews) => {
+  const reviews = rawReviews.map(({
     NAME, LINK, RATING, BOOK_ID
   }) => ({
       NAME, LINK, RATING, BOOK_ID,
@@ -12,6 +11,9 @@ const processReviews = (rawReviews) =>
       DATE: (new Date()).toISOString()
     })
   )
+
+  return reviews
+}
 
 const composeQuery = ({
     ID, BOOK_ID, NAME, GENDER, DATE, RATING, LINK
@@ -29,14 +31,19 @@ const composeQuery = ({
   );
 `
 
-const writeToDB = (rawReviews) => {
-  db.serialize(() =>
-    processReviews(rawReviews)
-      .forEach((review) => db.run(composeQuery(review)))
-  )
+const writeToDB = (rawReviews) => new Promise((resolve, reject) => {
+  const db = new sqlite3.Database('books.db')
+  db.serialize(() => {
+    const reviews = processReviews(rawReviews)
+    reviews.forEach((review, index) => {
+      db.run(composeQuery(review))
+    })
 
-  console.log('success!')
-  db.close();
-}
+    db.close((err) => {
+      if (err) return reject(err)
+      return resolve(err)
+    })
+  })
+})
 
 module.exports = writeToDB

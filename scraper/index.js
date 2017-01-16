@@ -1,7 +1,9 @@
 const scrapeBook = require('./scrapeBook')
-const writeToDB = require('./writeToDB')
 
-scrapeBook('0316769177').then((rawReviews) => {
-    writeToDB(rawReviews)
-})
-
+scrapeBook('0316769177')
+    .then(() => {
+        console.log('success!')
+    }, (err) => {
+        console.log('failure!')
+        console.log(err)
+    })
