@@ -1,6 +1,7 @@
 const scrapeBook = require('./scrapeBook')
+const ISBNs = require('./../data/ISBNs')
 
-scrapeBook('0316769177')
+scrapeBook(ISBNs.greatGatsby)
     .then(() => {
         console.log('success!')
     }, (err) => {

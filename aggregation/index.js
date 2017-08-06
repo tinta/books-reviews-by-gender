@@ -1,8 +1,10 @@
-var uuid = require('node-uuid');
+const uuid = require('node-uuid');
+const maleNames = require('./../data/maleNames')
+const femaleNames = require('./../data/femaleNames')
+const ISBNs = require('./../data/ISBNs')
 const sqlite3 = require('sqlite3').verbose()
-const maleNames = require('./maleNames')
-const femaleNames = require('./femaleNames')
 const db = new sqlite3.Database('books.db');
+
 
 class Ratings {
   constructor (name) {
@@ -27,21 +29,27 @@ class Ratings {
       return memo + item * this.collection[item]
     }, 0)
 
-    return allScores / this.getTotal()
+    return String(allScores / this.getTotal()).substring(0, 4)
   }
 
   print () {
     console.log('')
+    console.log('')
     console.log(this.name)
-    console.log(`total: ${this.getTotal()}`)
-    console.log(`average: ${this.getAverage()}`)
+    console.log(Array(50).join('='))
+    console.log(`Total Ratings: ${this.getTotal()}`)
+    console.log(`Average Rating: ${this.getAverage()}/5.00`)
+    console.log('')
+    console.log('Rating | % of reviewers that gave this rating')
+    console.log('-------+------------')
     return [1,2,3,4,5].forEach((item) => {
       const percent = (
         this.collection[item] /
         this.getTotal() *
         100
       )
-      console.log(`${item} | ${percent}`)
+      const percentStr = `${String(percent).substring(0,4)}%`
+      console.log(`${item}      | ${percentStr}`)
     })
   }
 }
@@ -50,32 +58,31 @@ const check = (arr, str) => arr
   .map((item) => item.toLowerCase())
   .some((item) => item === str)
 
-const cleanseNames = () => {
+const aggregate = (isbn) => {
   db.serialize(() => {
-    let male = new Ratings('male')
-    let female = new Ratings('female')
-    let andro = new Ratings('andro')
-    db.each("SELECT NAME, RATING FROM reviews", (err, { NAME, RATING }) => {
-
+    const male = new Ratings('Male Reviewers')
+    const female = new Ratings('Female Reviewers')
+    const andro = new Ratings('Androgynously-Named Reviewers')
+    const query = `SELECT NAME, RATING, BOOK_ID FROM reviews WHERE BOOK_ID = ${isbn}`
+    console.log(query)
+    db.each(query, (err, { NAME, RATING, BOOK_ID }) => {
+      // console.log(BOOK_ID)
       const name = NAME.split(' ')[0].toLowerCase()
       if (name === '') return
-      // console.log(name)
-      // if (name)
-      // const name = NAME
       const reviwerIsMale = check(maleNames, name)
       const reviewerIsFemale = check(femaleNames, name)
       if (reviwerIsMale && reviewerIsFemale) {
         andro.add(RATING)
       } else {
         if (reviwerIsMale) {
-          // names.push(name)
           male.add(RATING)
         }
         if (reviewerIsFemale) female.add(RATING)
       }
     }, () => {
       const total = male.getTotal() + female.getTotal() + andro.getTotal()
-      console.log(`total reviews: ${total}`)
+      console.log(`ISBN: ${isbn}`)
+      console.log(`Total ratings (all genders): ${total}`)
 
       male.print()
       female.print()
@@ -86,4 +93,4 @@ const cleanseNames = () => {
   db.close();
 }
 
-module.exports = cleanseNames()
+module.exports = aggregate(ISBNs.greatGatsby)

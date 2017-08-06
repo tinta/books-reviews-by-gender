@@ -1,4 +1,4 @@
-var uuid = require('node-uuid');
+const uuid = require('node-uuid');
 const sqlite3 = require('sqlite3').verbose()
 
 const processReviews = (rawReviews) => {

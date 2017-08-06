@@ -1,5 +1,6 @@
 const Nightmare = require('nightmare')
 const writeToDB = require('./writeToDB')
+const _ = require('lodash')
 
 const getUrl = (isbn, page) => `https://www.goodreads.com/api/reviews_widget_iframe?did=0&format=html&isbn=${isbn}&links=660&min_rating=&page=${page}&review_back=fff&stars=000&text=000`
 
@@ -66,15 +67,16 @@ const scrapeBookByPage = (isbn, pageToScrape, numOfPages) => new Promise((resolv
         console.log(`scrapePage() failed: ${isbn} ${pageToScrape}`)
         return reject(err)
     }).then(() => {
-        if (numOfPages <= 0) return resolve('all request pages have been scraped')
-        return thenDelay(2000).then(() => {
-            return scrapeBookByPage(isbn, pageToScrape + 1, numOfPages - 1).then(resolve)
-        })
+        if (numOfPages <= 1) return resolve('all request pages have been scraped')
+        return thenDelay(_.random(500, 3000))
+            .then(() =>
+                scrapeBookByPage(isbn, pageToScrape + 1, numOfPages - 1).then(resolve)
+            )
     })
 )
 
 const scrapeBook = (isbn) =>
-    scrapeBookByPage(isbn, 1002, 1003).then(() => {
+    scrapeBookByPage(isbn, 0, 5000).then(() => {
         console.log('scrapeBookByPage() success')
         return true
     }, (err) => {
